@@ -30,7 +30,15 @@ interface RobotSceneProps {
   theme?: Theme;
 }
 
-/** Palette de la scène 3D par thème (fond, brouillard, sol, grille, lumière). */
+/**
+ * Palette de la scène 3D par thème.
+ *
+ * Les couleurs des segments DÉPENDENT du thème : un acier clair se voit sur
+ * fond sombre, mais se fondrait dans un fond clair. On choisit donc un acier
+ * clair en mode sombre et un acier foncé en mode clair → bon contraste partout.
+ * L'ambiant est volontairement modéré pour conserver le modelé (sinon la forme
+ * du bras s'aplatit et devient illisible).
+ */
 const SCENE_PALETTE = {
   dark: {
     background: "#0a0a0b",
@@ -38,8 +46,12 @@ const SCENE_PALETTE = {
     floor: "#0c0c0e",
     gridCell: "#1f1f26",
     gridSection: "#2dd4bf",
-    ambient: 0.4,
+    ambient: 0.45,
     hemi: ["#3a4a55", "#0a0a0b", 0.5] as [string, string, number],
+    arm: "#9aa0aa", // acier clair
+    joint: "#5d626b",
+    finger: "#c2c7cf",
+    socle: "#4a4e56",
   },
   light: {
     background: "#e9ebee",
@@ -47,34 +59,27 @@ const SCENE_PALETTE = {
     floor: "#dde0e5",
     gridCell: "#c6ccd3",
     gridSection: "#0d9488",
-    ambient: 0.9,
-    hemi: ["#ffffff", "#c9ced6", 0.8] as [string, string, number],
+    ambient: 0.55,
+    hemi: ["#ffffff", "#aeb4bd", 0.5] as [string, string, number],
+    arm: "#5a606a", // acier foncé
+    joint: "#3f444c",
+    finger: "#787e88",
+    socle: "#868c95",
   },
 } as const;
+
+type Palette = (typeof SCENE_PALETTE)[Theme];
 
 // ───────────────────────────────────────────────────────────────────────────
 //  Le bras articulé
 // ───────────────────────────────────────────────────────────────────────────
 
 /**
- * Matériau « acier » des segments.
- * IMPORTANT : metalness volontairement modéré (≈0.45). Sans environment map
- * (HDR), un matériau très métallique n'a rien à réfléchir et rend quasi noir
- * → le bras devient invisible. Une part diélectrique suffisante le rend
- * visible sous l'éclairage direct, tout en gardant un aspect métal brossé.
+ * Base de matériau « acier ». metalness modéré : sans environment map (HDR),
+ * un matériau trop métallique n'a rien à réfléchir et rend quasi noir. La
+ * couleur est fournie par la palette (dépend du thème).
  */
-const metalProps = {
-  color: "#8b919c",
-  metalness: 0.45,
-  roughness: 0.5,
-} as const;
-
-/** Acier plus sombre pour les rotules / jonctions. */
-const jointProps = {
-  color: "#5d626b",
-  metalness: 0.45,
-  roughness: 0.5,
-} as const;
+const steelBase = { metalness: 0.45, roughness: 0.5 } as const;
 
 /** Accent menthe — émissif pour rester lisible quel que soit l'éclairage. */
 const accentProps = {
@@ -85,7 +90,13 @@ const accentProps = {
   emissiveIntensity: 0.5,
 } as const;
 
-function RobotArm({ controller }: RobotSceneProps) {
+function RobotArm({
+  controller,
+  palette,
+}: {
+  controller: RobotController;
+  palette: Palette;
+}) {
   // Réfs vers les pivots des 5 articulations de chaîne (axes 0..4).
   const jointRefs = useRef<(THREE.Group | null)[]>([]);
   // Réfs vers les deux doigts de la pince (axe 5).
@@ -125,7 +136,7 @@ function RobotArm({ controller }: RobotSceneProps) {
         <cylinderGeometry
           args={[S.baseRadius, S.baseRadius * 1.15, S.baseHeight, 48]}
         />
-        <meshStandardMaterial {...metalProps} color="#4a4e56" />
+        <meshStandardMaterial {...steelBase} color={palette.socle} />
       </mesh>
 
       {/* ── Axe 0 : BASE (yaw, rotation Y) ───────────────────────────── */}
@@ -141,29 +152,29 @@ function RobotArm({ controller }: RobotSceneProps) {
           {/* Segment bras (le long de Y, part du pivot) */}
           <mesh position={[0, S.shoulderLength / 2, 0]} castShadow>
             <cylinderGeometry args={[S.linkRadius, S.linkRadius, S.shoulderLength, 32]} />
-            <meshStandardMaterial {...metalProps} />
+            <meshStandardMaterial {...steelBase} color={palette.arm} />
           </mesh>
 
           {/* ── Axe 2 : COUDE (pitch, rotation Z) ────────────────────── */}
           <group ref={setJointRef(2)} position={[0, S.shoulderLength, 0]}>
             <mesh castShadow>
               <sphereGeometry args={[S.linkRadius * 1.15, 24, 24]} />
-              <meshStandardMaterial {...jointProps} />
+              <meshStandardMaterial {...steelBase} color={palette.joint} />
             </mesh>
             <mesh position={[0, S.forearmLength / 2, 0]} castShadow>
               <cylinderGeometry args={[S.linkRadius * 0.85, S.linkRadius * 0.85, S.forearmLength, 32]} />
-              <meshStandardMaterial {...metalProps} />
+              <meshStandardMaterial {...steelBase} color={palette.arm} />
             </mesh>
 
             {/* ── Axe 3 : POIGNET PITCH (rotation Z) ─────────────────── */}
             <group ref={setJointRef(3)} position={[0, S.forearmLength, 0]}>
               <mesh castShadow>
                 <sphereGeometry args={[S.linkRadius * 0.95, 24, 24]} />
-                <meshStandardMaterial {...jointProps} />
+                <meshStandardMaterial {...steelBase} color={palette.joint} />
               </mesh>
               <mesh position={[0, S.wristLength / 2, 0]} castShadow>
                 <cylinderGeometry args={[S.linkRadius * 0.7, S.linkRadius * 0.7, S.wristLength, 32]} />
-                <meshStandardMaterial {...metalProps} />
+                <meshStandardMaterial {...steelBase} color={palette.arm} />
               </mesh>
 
               {/* ── Axe 4 : POIGNET ROLL (rotation Y) ────────────────── */}
@@ -179,7 +190,7 @@ function RobotArm({ controller }: RobotSceneProps) {
                   {/* base de pince */}
                   <mesh position={[0, S.toolLength * 0.2, 0]} castShadow>
                     <boxGeometry args={[S.linkRadius * 1.8, S.toolLength * 0.4, S.linkRadius * 1.2]} />
-                    <meshStandardMaterial {...jointProps} />
+                    <meshStandardMaterial {...steelBase} color={palette.joint} />
                   </mesh>
                   {/* doigt gauche */}
                   <mesh
@@ -188,7 +199,7 @@ function RobotArm({ controller }: RobotSceneProps) {
                     castShadow
                   >
                     <boxGeometry args={[S.fingerThickness, S.fingerLength, S.fingerThickness * 2]} />
-                    <meshStandardMaterial {...metalProps} color="#aab0b9" />
+                    <meshStandardMaterial {...steelBase} color={palette.finger} />
                   </mesh>
                   {/* doigt droit */}
                   <mesh
@@ -197,7 +208,7 @@ function RobotArm({ controller }: RobotSceneProps) {
                     castShadow
                   >
                     <boxGeometry args={[S.fingerThickness, S.fingerLength, S.fingerThickness * 2]} />
-                    <meshStandardMaterial {...metalProps} color="#aab0b9" />
+                    <meshStandardMaterial {...steelBase} color={palette.finger} />
                   </mesh>
                 </group>
               </group>
@@ -212,8 +223,6 @@ function RobotArm({ controller }: RobotSceneProps) {
 // ───────────────────────────────────────────────────────────────────────────
 //  Sol + objets de scène (extensible : future zone de vision/tri)
 // ───────────────────────────────────────────────────────────────────────────
-
-type Palette = (typeof SCENE_PALETTE)[Theme];
 
 function SceneEnvironment({ palette }: { palette: Palette }) {
   return (
@@ -264,7 +273,10 @@ export default function RobotScene({
 
   return (
     <Canvas
-      shadows
+      // "percentage" => PCFShadowMap (désormais doux). On évite ainsi le défaut
+      // `shadows`=true → PCFSoftShadowMap, déprécié et bugué depuis three r0.182
+      // (warning à chaque frame + ombres pixelisées).
+      shadows="percentage"
       dpr={[1, 2]}
       camera={{ position: [6, 5, 7], fov: 45 }}
       gl={{ antialias: true }}
@@ -292,6 +304,7 @@ export default function RobotScene({
       <hemisphereLight args={palette.hemi} />
 
       <SceneEnvironment palette={palette} />
+      <RobotArm controller={controller} palette={palette} />
 
       <OrbitControls
         makeDefault
