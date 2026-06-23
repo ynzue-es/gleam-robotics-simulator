@@ -1,0 +1,112 @@
+@import "tailwindcss";
+
+/*
+  Tailwind CSS v4 — configuration "CSS-first".
+  Les tokens de design (couleurs, polices, rayons) sont déclarés ici via @theme
+  plutôt que dans un tailwind.config.js. Esthétique : dark, éditoriale, premium.
+*/
+@theme {
+  /* Palette sombre — base anthracite, accents froids/métal */
+  --color-ink: #0a0a0b; /* fond principal, presque noir */
+  --color-ink-soft: #111113; /* surfaces légèrement relevées */
+  --color-panel: #16161a; /* panneaux / cartes */
+  --color-line: #26262c; /* bordures discrètes */
+  --color-muted: #8a8a93; /* texte secondaire */
+  --color-fog: #c7c7cf; /* texte courant */
+  --color-chalk: #f4f4f5; /* titres, texte fort */
+  --color-accent: #6ee7d4; /* accent menthe/métal froid (Gleam) */
+  --color-accent-deep: #2dd4bf;
+
+  /* Typographie — variables fournies par next/font (voir layout.tsx) */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, "SFMono-Regular", monospace;
+
+  /* Rayons */
+  --radius-base: 0.625rem;
+}
+
+/*
+  Mode clair — surcharge des variables de couleur sous `html.light`.
+  Tous les utilitaires Tailwind (bg-ink, text-chalk, border-line…) référencent
+  ces variables : ils suivent donc automatiquement le changement de thème.
+*/
+html.light {
+  --color-ink: #fbfbfc; /* fond de page */
+  --color-ink-soft: #f1f1f4; /* surfaces légèrement creusées */
+  --color-panel: #ffffff; /* cartes / panneaux */
+  --color-line: #e3e3e8; /* bordures */
+  --color-muted: #66666f; /* texte secondaire */
+  --color-fog: #34343b; /* texte courant */
+  --color-chalk: #0a0a0b; /* titres */
+  --color-accent: #0d9488; /* teal plus profond pour contraste sur clair */
+  --color-accent-deep: #0f766e;
+}
+
+/* Reset doux + base globale */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-ink);
+  color: var(--color-fog);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Sélection accentuée */
+::selection {
+  background-color: var(--color-accent);
+  color: var(--color-ink);
+}
+
+/* Scrollbar discrète, cohérente avec le thème sombre */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line) transparent;
+}
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background-color: var(--color-line);
+  border-radius: 9999px;
+}
+
+/* Curseur (thumb) des sliders d'axes — cohérent cross-browser */
+.gleam-slider::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  height: 16px;
+  width: 16px;
+  border-radius: 9999px;
+  background: var(--color-chalk);
+  border: 2px solid var(--color-accent);
+  box-shadow: 0 0 0 4px rgba(110, 231, 212, 0.12);
+  transition: transform 0.1s ease;
+}
+.gleam-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+.gleam-slider::-moz-range-thumb {
+  height: 16px;
+  width: 16px;
+  border-radius: 9999px;
+  background: var(--color-chalk);
+  border: 2px solid var(--color-accent);
+}
+
+/* Grain / texture subtile pour l'aspect éditorial premium */
+.bg-grid {
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 64px 64px;
+}
+html.light .bg-grid {
+  background-image:
+    linear-gradient(to right, rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+}
