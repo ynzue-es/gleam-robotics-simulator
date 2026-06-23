@@ -1,9 +1,11 @@
 "use client";
 
-/** Navbar — barre fine, sticky, transparente puis opaque au scroll. */
+/** Navbar — barre fine, sticky, transparente puis floutée au scroll. */
 
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { ArrowUpRight } from "lucide-react";
+import { Logo } from "@/components/brand/Logo";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
 export function Navbar() {
@@ -14,33 +16,37 @@ export function Navbar() {
       transition={{ duration: 0.6, ease: "easeOut" }}
       className="fixed inset-x-0 top-0 z-50 border-b border-line/60 bg-ink/70 backdrop-blur-md"
     >
-      <nav className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-        <Link href="/" className="flex items-center gap-2">
-          <span className="h-2 w-2 rounded-full bg-accent shadow-[0_0_12px_2px_rgba(110,231,212,0.5)]" />
-          <span className="text-sm font-semibold tracking-tight text-chalk">
-            Gleam<span className="text-muted"> · Robotics</span>
-          </span>
+      <nav className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3.5">
+        <Link href="/" aria-label="Accueil Gleam Robotics">
+          <Logo />
         </Link>
 
         <div className="flex items-center gap-6 text-sm">
           <a
             href="#probleme"
-            className="hidden text-muted transition-colors hover:text-chalk sm:block"
+            className="hidden text-muted transition-colors hover:text-chalk md:block"
           >
-            Problème
+            Le problème
           </a>
           <a
-            href="#fonctionnement"
-            className="hidden text-muted transition-colors hover:text-chalk sm:block"
+            href="#systeme"
+            className="hidden text-muted transition-colors hover:text-chalk md:block"
           >
-            Fonctionnement
+            Le système
+          </a>
+          <a
+            href="#demo"
+            className="hidden text-muted transition-colors hover:text-chalk md:block"
+          >
+            Démo
           </a>
           <ThemeToggle />
           <Link
             href="/simulator"
-            className="rounded-[var(--radius-base)] bg-accent px-4 py-1.5 text-xs font-medium text-ink transition-colors hover:bg-accent-deep"
+            className="group inline-flex items-center gap-1.5 rounded-[var(--radius-base)] bg-accent px-4 py-1.5 text-xs font-medium text-ink transition-colors hover:bg-accent-deep"
           >
             Simulateur
+            <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </Link>
         </div>
       </nav>

@@ -1,14 +1,16 @@
 "use client";
 
-/** Démo — placeholder vidéo (à remplacer après le test terrain) + CTA simulateur. */
+/** Démo — placeholder vidéo (à remplacer après le test terrain) + CTA. */
 
 import Link from "next/link";
+import Image from "next/image";
 import { PlayCircle, ArrowRight } from "lucide-react";
 import { Reveal } from "./Reveal";
+import { unsplash, PHOTOS } from "@/lib/images";
 
 export function Demo() {
   return (
-    <section className="border-t border-line/60 py-28">
+    <section id="demo" className="border-t border-line/60 py-24 sm:py-28">
       <div className="mx-auto max-w-6xl px-6">
         <Reveal>
           <span className="text-xs uppercase tracking-[0.25em] text-accent">
@@ -25,15 +27,23 @@ export function Demo() {
 
         <Reveal delay={0.1}>
           {/* Placeholder vidéo — remplacer par <video> / embed après le test */}
-          <div className="group relative mt-12 aspect-video w-full overflow-hidden rounded-[var(--radius-base)] border border-line bg-ink-soft">
-            <div className="bg-grid absolute inset-0 opacity-40" />
-            <div className="absolute left-1/2 top-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent/10 blur-[80px]" />
+          <div className="group relative mt-12 aspect-video w-full overflow-hidden rounded-2xl border border-line">
+            <Image
+              src={unsplash(PHOTOS.robotFactory, { w: 1600 })}
+              alt="Aperçu : chaîne robotisée en atelier"
+              fill
+              sizes="100vw"
+              className="object-cover opacity-50 transition-opacity duration-500 group-hover:opacity-70"
+            />
+            <div className="absolute inset-0 bg-ink/40" />
             <div className="relative flex h-full flex-col items-center justify-center gap-4">
-              <PlayCircle
-                className="h-16 w-16 text-muted transition-colors group-hover:text-accent"
-                strokeWidth={1}
-              />
-              <span className="text-sm uppercase tracking-[0.2em] text-muted">
+              <div className="flex h-20 w-20 items-center justify-center rounded-full border border-line bg-ink/60 backdrop-blur transition-colors group-hover:border-accent">
+                <PlayCircle
+                  className="h-10 w-10 text-chalk transition-colors group-hover:text-accent"
+                  strokeWidth={1.2}
+                />
+              </div>
+              <span className="text-sm uppercase tracking-[0.2em] text-fog">
                 Vidéo à venir — test terrain
               </span>
             </div>
@@ -41,7 +51,7 @@ export function Demo() {
         </Reveal>
 
         <Reveal delay={0.15}>
-          <div className="mt-12 flex flex-col items-start justify-between gap-6 rounded-[var(--radius-base)] border border-line bg-panel/60 p-8 sm:flex-row sm:items-center">
+          <div className="mt-12 flex flex-col items-start justify-between gap-6 rounded-2xl border border-line bg-panel/60 p-8 sm:flex-row sm:items-center">
             <div>
               <h3 className="text-xl font-semibold text-chalk">
                 Essayez le simulateur dès maintenant
