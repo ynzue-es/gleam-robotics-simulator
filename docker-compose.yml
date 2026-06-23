@@ -1,0 +1,15 @@
+# Front gleam-robotics : rejoint le réseau « edge » pour être joignable par le
+# Caddy frontal (gleam-infra) sous le nom gleam-robotics-web:3000.
+# Pas de port publié : seul Caddy expose 80/443.
+services:
+  web:
+    build: .
+    image: gleam-robotics-web
+    container_name: gleam-robotics-web
+    restart: unless-stopped
+    networks:
+      - edge
+
+networks:
+  edge:
+    external: true
